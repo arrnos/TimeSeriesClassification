@@ -1,0 +1,74 @@
+********************* SVM  预测：  *********************
+
+model :
+ SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape='ovr', degree=3, gamma='auto', kernel='rbf',
+  max_iter=-1, probability=False, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)
+
+              precision    recall  f1-score   support
+
+         -1       0.55      0.62      0.58        29
+          1       0.63      0.56      0.59        34
+
+avg / total       0.59      0.59      0.59        63
+
+
+ [[18 11]
+ [15 19]]
+
+
+*********************   LR 预测：  *********************
+
+model :
+ LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+          intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+          penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+          verbose=0, warm_start=False)
+
+              precision    recall  f1-score   support
+
+         -1       0.53      0.55      0.54        29
+          1       0.61      0.59      0.60        34
+
+avg / total       0.57      0.57      0.57        63
+
+
+ [[16 13]
+ [14 20]]
+
+
+*********************  KNN 预测：  *********************
+
+model :
+ KNeighborsClassifier(algorithm='auto', leaf_size=30, metric='minkowski',
+           metric_params=None, n_jobs=1, n_neighbors=5, p=2,
+           weights='uniform')
+
+              precision    recall  f1-score   support
+
+         -1       0.66      0.66      0.66        29
+          1       0.71      0.71      0.71        34
+
+avg / total       0.68      0.68      0.68        63
+
+
+ [[19 10]
+ [10 24]]
+
+
+*********************  NB 预测：  *********************
+
+model :
+ GaussianNB(priors=None)
+
+              precision    recall  f1-score   support
+
+         -1       0.67      0.55      0.60        29
+          1       0.67      0.76      0.71        34
+
+avg / total       0.67      0.67      0.66        63
+
+
+ [[16 13]
+ [ 8 26]]

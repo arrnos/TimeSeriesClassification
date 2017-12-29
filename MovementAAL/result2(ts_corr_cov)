@@ -1,0 +1,64 @@
+*********************   LR 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.80      0.80      0.80        20
+          1       0.86      0.86      0.86        28
+
+avg / total       0.83      0.83      0.83        48
+
+Accuracy : 0.8333
+AUC Score (Train): 0.867857
+
+
+********************* SVM  预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.95      0.95      0.95        20
+          1       0.96      0.96      0.96        28
+
+avg / total       0.96      0.96      0.96        48
+
+Accuracy : 0.9583
+AUC Score (Train): 0.989286
+
+
+*********************  KNN 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       1.00      0.95      0.97        20
+          1       0.97      1.00      0.98        28
+
+avg / total       0.98      0.98      0.98        48
+
+Accuracy : 0.9792
+AUC Score (Train): 0.966071
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.95      1.00      0.98        20
+          1       1.00      0.96      0.98        28
+
+avg / total       0.98      0.98      0.98        48
+
+Accuracy : 0.9792
+AUC Score (Train): 0.996429
+*********************  XGBoost 预测：  *********************
+
+              precision    recall  f1-score   support
+
+          0       0.87      1.00      0.93        20
+          1       1.00      0.89      0.94        28
+
+avg / total       0.95      0.94      0.94        48
+
+Accuracy : 0.9375
