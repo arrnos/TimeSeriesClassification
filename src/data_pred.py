@@ -149,7 +149,6 @@ def stats_feature(x):
     columns = ts_columns+corr_columns+cov_columns
     return fea_list,columns
 
-
 if __name__ == '__main__':
     X_df_list, y = data_read()
     # X_SVD_feature, y = EMD_SVD_feature(X_df_list,y)
