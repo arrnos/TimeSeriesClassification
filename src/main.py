@@ -4,10 +4,8 @@ from src.feature_select import *
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-
 # 一、读取原始数据
 X_df_list, y = data_read()
-
 
 # 二、特征提取
 
@@ -34,20 +32,21 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random
 
 # 模型字典
 model_dict = {
-        "SVM": SVM,
-        "LR": LR,
-        "KNN": KNN,
-        "GBDT": GBDT,
-        "XGB": XGBoost
-    }
+    "SVM": SVM,
+    "LR": LR,
+    "KNN": KNN,
+    "GBDT": GBDT,
+    "XGB": XGBoost
+}
 
 # 待测试模型列表
 # model_test = ["LR","SVM", "KNN","GBDT"]
-model_test = ["GBDT"]
+model_test = ["LR"]
 # grid=True
 grid = False
-silent=False
+silent = False
+init_train = True
 
 # 训练并测试
 for model in model_test:
-    model_dict.get(model)(X_train, X_test, y_train, y_test,grid_search=grid,silent=silent)
+    model_dict.get(model)(X_train, X_test, y_train, y_test, grid_search=grid, init_train=init_train, silent=silent)

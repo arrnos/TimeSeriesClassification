@@ -17,7 +17,7 @@ import xgboost as xgb
 from xgboost.sklearn import XGBClassifier
 
 
-def LR(X_train, X_test, y_train, y_test, grid_search=False, silent=True):
+def LR(X_train, X_test, y_train, y_test, grid_search=False, init_train=True, silent=True):
     """
     (一) penalty惩罚项 : ‘l1’ or ‘l2’, 默认: ‘l2’
     注：在调参时如果我们主要的目的只是为了解决过拟合，一般penalty选择L2正则化就够了。但是如果选择L2正则化发现还是过拟合，即预测效果差的时候，就可以考虑L1正则化。另外，如果模型的特征非常多，我们希望一些不重要的特征系数归零，从而让模型系数稀疏化的话，也可以使用L1正则化。
@@ -35,7 +35,8 @@ def LR(X_train, X_test, y_train, y_test, grid_search=False, silent=True):
         print("\n\n*********************   LR 预测：  ********************* \n")
 
         model = LogisticRegression()
-        model.set_params(C=61, penalty='l1', solver='liblinear')
+        if init_train is False:
+            model.set_params(C=61, penalty='l1', solver='liblinear')
         model.fit(X_train, y_train)
         if silent is False:
             print("model : \n", model)
@@ -54,10 +55,11 @@ def LR(X_train, X_test, y_train, y_test, grid_search=False, silent=True):
         model_select(X_train, X_test, y_train, y_test, model, grid_param)
 
 
-def SVM(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
+def SVM(X_train, X_test, y_train, y_test, grid_search=False, init_train=True, silent=False):
     if grid_search is False:
         model = SVC(probability=True)
-        model.set_params(kernel='rbf', C=200, gamma=0.0014)
+        if init_train is False:
+            model.set_params(kernel='rbf', C=200, gamma=0.0014)
         model.fit(X_train, y_train)
         print("\n\n********************* SVM  预测：  ********************* \n")
         if silent is False:
@@ -81,7 +83,7 @@ def SVM(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
         model_select(X_train, X_test, y_train, y_test, model, grid_param)
 
 
-def KNN(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
+def KNN(X_train, X_test, y_train, y_test, grid_search=False, init_train=True, silent=False):
     if grid_search is False:
         model = KNeighborsClassifier()
         model.fit(X_train, y_train)
@@ -101,14 +103,18 @@ def KNN(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
         model_select(X_train, X_test, y_train, y_test, model, grid_params)
 
 
-def GBDT(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
+def GBDT(X_train, X_test, y_train, y_test, grid_search=False, init_train=True, silent=False):
     """
     调参请看：http://www.cnblogs.com/pinard/p/6143927.html
     """
     if grid_search is False:
+
         model = GradientBoostingClassifier(random_state=100)
-        model.set_params(learning_rate=0.1, n_estimators=100, random_state=100, min_samples_leaf=16,
-                         min_samples_split=2)
+
+        if init_train is False:
+            model.set_params(learning_rate=0.1, n_estimators=100, random_state=100, min_samples_leaf=16,
+                             min_samples_split=2)
+
         model.fit(X_train, y_train)
         print("\n\n*********************  GBDT 预测：  ********************* \n")
         if silent is False:
@@ -183,56 +189,157 @@ def GBDT(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
             # XGBoost 分类器模型
 
 
-def XGBoost(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
-    # 参数设置
-    params = {
-        'booster': 'gbtree',
-        'objective': 'multi:softmax',  # 多分类的问题
-        'num_class': 2,  # 类别数，与 multisoftmax 并用
-        # 'gamma': 0.1,  # 用于控制是否后剪枝的参数,越大越保守，一般0.1、0.2这样子。
-        # 'max_depth': 12,  # 构建树的深度，越大越容易过拟合
-        # 'lambda': 2,  # 控制模型复杂度的权重值的L2正则化项参数，参数越大，模型越不容易过拟合。
-        # 'subsample': 0.7,  # 随机采样训练样本
-        # 'colsample_bytree': 0.7,  # 生成树时进行的列采样
-        # 'min_child_weight': 3,
-        # # 这个参数默认是 1，是每个叶子里面 h 的和至少是多少，对正负样本不均衡时的 0-1 分类而言
-        # # ，假设 h 在 0.01 附近，min_child_weight 为 1 意味着叶子节点中最少需要包含 100 个样本。
-        # # 这个参数非常影响结果，控制叶子节点中二阶导的和的最小值，该参数值越小，越容易 overfitting。
-        'silent': 1,  # 设置成1则没有运行信息输出，最好是设置为0.
-        # 'eta': 0.01,  # 如同学习率
-        # 'seed': 1000,
-        # 'nthread': 7,  # cpu 线程数
-    }
+def XGBoost(X_train, X_test, y_train, y_test, grid_search=False, init_train=True, silent=False):
+    """
+    调参参考：http://blog.csdn.net/han_xiaoyang/article/details/52665396
 
-    X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=0.15, random_state=500)
-    xgb_valid = xgb.DMatrix(X_valid, label=y_valid)
-    xgb_train = xgb.DMatrix(X_train, label=y_train)
-    xgb_test = xgb.DMatrix(X_test, y_test)
+    默认初始值：
+    1、learning_rate[默认0.3]   典型值为0.01-0.2   初始值：0.1
+    2、min_child_weight[默认1]  决定最小叶子节点样本权重和 分类不平衡问题，要减小
+    3、max_depth[默认6]   典型值：3-10 初始值：5
+    4、gamma[默认0] Gamma指定了节点分裂所需的最小损失函数下降值。典型值: [0.1,0.2]
+    5、subsample[默认1]  典型值：0.5-1   推荐值：0.8
+    6、colsample_bytree[默认1]  典型值：0.5-1   推荐值：0.8
+    7、lambda[默认1]   权重的L2正则化项。
+    8、alpha[默认1]    权重的L1正则化项。
+    9、scale_pos_weight[默认1]  在各类别样本十分不平衡时，把这个参数设定为一个正值，可以使算法更快收敛
+    """
+    if grid_search is False:
 
-    num_rounds = 5000  # 迭代次数
-    watchlist = [(xgb_train, 'train'), (xgb_valid, 'val')]
+        # 默认参数设置
+        params_default = {
+            'booster': 'gbtree',
+            'objective': 'multi:softmax',  # 多分类的问题
+            'num_class': 2,  # 类别数，与 multisoftmax 并用
+            # 'max_depth': 5,  # 构建树的深度，越大越容易过拟合
+            # 'min_child_weight': 1,
+            # 'gamma': 0.1,  # 用于控制是否后剪枝的参数,越大越保守，一般0.1、0.2这样子。
+            # 'subsample': 0.8,  # 随机采样训练样本
+            # 'colsample_bytree': 0.8,  # 生成树时进行的列采样
+            # 'lambda': 1,  # 控制模型复杂度的权重值的L2正则化项参数，参数越大，模型越不容易过拟合。
+            # 'alpha': 0.1,  # 控制模型复杂度的权重值的L1正则化项参数，参数越大，模型越不容易过拟合。
+            'silent': 1,  # 设置成1则没有运行信息输出，最好是设置为0.
+        }
 
-    # 训练模型并保存
-    # early_stopping_rounds 当设置的迭代次数较大时，early_stopping_rounds 可在一定的迭代次数内准确率没有提升就停止训练
-    model = xgb.train(params, xgb_train, num_rounds, watchlist, early_stopping_rounds=100)
-    model.save_model('MovementAAL/model/xgb.model')  # 用于存储训练出的模型
-    print("best best_ntree_limit:", model.best_ntree_limit)
-    y_pred = model.predict(xgb_test, ntree_limit=model.best_ntree_limit)
+        # 定义数据
+        X_train, X_valid, y_train, y_valid = train_test_split(X_train, y_train, test_size=0.15, random_state=500)
+        xgb_valid = xgb.DMatrix(X_valid, label=y_valid)
+        xgb_train = xgb.DMatrix(X_train, label=y_train)
+        xgb_test = xgb.DMatrix(X_test, y_test)
 
-    print('\n', classification_report(y_test, y_pred))
-    print("Accuracy : %.4g" % accuracy_score(y_test, y_pred))
+        watchlist = [(xgb_train, 'train'), (xgb_valid, 'val')]
+        num_rounds = 5000  # 迭代次数
+        early_stopping = 100
+
+        # 优化参数
+        params = {}
+
+        if init_train is True:
+            params = params_default
+
+        # 训练模型并保存
+        model = xgb.train(params, xgb_train, num_rounds, watchlist, early_stopping_rounds=early_stopping)
+        # 获取验证集合结果
+        model.save_model('MovementAAL/model/xgb.model')  # 用于存储训练出的模型
+        print("best best_ntree_limit:", model.best_ntree_limit)
+        y_pred = model.predict(xgb_test, ntree_limit=model.best_ntree_limit)
+
+        print('\n', classification_report(y_test, y_pred))
+        print("Accuracy : %.4g" % accuracy_score(y_test, y_pred))
+
+    else:
+        print("\n\n********************* XGBoost Grid Search：  ********************* \n")
+        # Set the parameters by cross-validation
+        # 初始化模型
+        model = XGBClassifier(learning_rate=0.1,
+                              max_depth=5, min_child_weight=1, gamma=0,
+                              colsample_bytree=0.8, subsample=0.8,
+                              objective='binary:logistic', random_state=100)
+        # 调参步骤
+        step = 7
+
+        if step == 1:
+            # n_estimators 调优
+
+            param_test = {'n_estimators': range(50, 80, 1)}
+
+            model_select(X_train, X_test, y_train, y_test, model, param_test)
+
+        if step == 2:
+            # max_depth 和 min_weight 调优
+
+            param_test = {'max_depth': range(3, 6, 1), 'min_child_weight': np.arange(0.1, 0.3, 0.02)}
+
+            model.set_params(n_estimators=60)
+
+            model_select(X_train, X_test, y_train, y_test, model, param_test)
+
+        if step == 3:
+            # gamma参数调优
+
+            param_test = {'gamma': [0, 0.1, 0.01]}
+
+            model.set_params(n_estimators=60, max_depth=4, min_child_weight=0.2)
+
+            model_select(X_train, X_test, y_train, y_test, model, param_test)
+
+        if step == 4:
+            # subsample 和 colsample_bytree 调优
+
+            param_test = {'subsample': np.arange(0.5, 0.96, 0.05), 'colsample_bytree': np.arange(0.5, 0.96, 0.05)}
+
+            model.set_params(n_estimators=60, max_depth=4, min_child_weight=0.2, gamma=0)
+
+            model_select(X_train, X_test, y_train, y_test, model, param_test)
+
+        if step == 5:
+            # reg_alpha调优
+
+            # param_test = {'reg_alpha': [1e-5, 1e-4, 1e-3, 1e-2, 0.1, 1, 10]}
+
+            param_test = {'reg_alpha': np.arange(0.005, 0.15, 0.001)}
+
+            model.set_params(n_estimators=60, max_depth=4, min_child_weight=0.2, gamma=0, subsample=0.6,
+                             colsample_bytree=0.8)
+
+            model_select(X_train, X_test, y_train, y_test, model, param_test)
+
+        if step == 6:
+            # reg_lambda调优
+
+            # param_test = {'reg_lambda': [1e-5, 1e-4, 1e-3, 1e-2, 0.1, 1, 10]}
+
+            param_test = {'reg_lambda': np.arange(0.1, 2, 0.1)}
+
+            model.set_params(n_estimators=60, max_depth=4, min_child_weight=0.2, gamma=0, subsample=0.6,
+                             colsample_bytree=0.8, reg_alpha=0.01)
+
+            model_select(X_train, X_test, y_train, y_test, model, param_test)
+
+        if step == 7:
+            # 学习率调优learning_rate
+            n = 60
+            param_test = [{'learning_rate': [0.1], 'n_estimators': [n]},
+                          {'learning_rate': [0.05], 'n_estimators': [n * 2]},
+                          {'learning_rate': [0.01], 'n_estimators': [n * 10]},
+                          {'learning_rate': [0.005], 'n_estimators': [n * 20]}]
+
+            model.set_params(max_depth=4, min_child_weight=0.2, gamma=0, subsample=0.6,
+                             colsample_bytree=0.8, reg_alpha=0.01, reg_lambda=1)
+
+            model_select(X_train, X_test, y_train, y_test, model, param_test)
 
 
 # model_select
 def model_select(X_train, X_test, y_train, y_test, model, grid_param, cv=5):
     # scores = ['precision', 'recall','accuracy','f1','roc_auc']
-    scores = ['accuracy']
+    scores = ['roc_auc']
 
     for score in scores:
         print("# Tuning hyper-parameters for %s" % score)
         print()
 
-        clf = GridSearchCV(model, grid_param, cv=cv,
+        clf = GridSearchCV(model, grid_param, cv=cv, n_jobs=4, iid=False,
                            scoring='%s' % score)
         # scoring='%s_macro' % score：precision_macro、recall_macro是用于multiclass/multilabel任务的
 
@@ -250,7 +357,8 @@ def model_select(X_train, X_test, y_train, y_test, model, grid_param, cv=5):
             print("%0.3f (+/-%0.03f) for %r"
                   % (mean, std * 2, params))
         print()
-
+        # print("opt model is :")
+        # print(clf)
         print("Detailed classification report:")
         print()
         print("The model is trained on the full development set.")
