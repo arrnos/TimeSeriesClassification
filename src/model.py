@@ -101,14 +101,21 @@ def KNN(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
         model_select(X_train, X_test, y_train, y_test, model, grid_params)
 
 
-# GBDT 分类器模型
 def GBDT(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
+    """
+    调参请看：http://www.cnblogs.com/pinard/p/6143927.html
+    """
     if grid_search is False:
         model = GradientBoostingClassifier(random_state=100)
+        model.set_params(learning_rate=0.1, n_estimators=100, random_state=100, min_samples_leaf=16,
+                         min_samples_split=2)
         model.fit(X_train, y_train)
         print("\n\n*********************  GBDT 预测：  ********************* \n")
         if silent is False:
             print("model : \n", model)
+            print("n_estimators : ", model.n_estimators)
+            # print("n_features_ : ",model.n_features_)
+            # print("feature_importances_ : ",model.feature_importances_ )
         y_pred = model.predict(X_test)
         y_predprob = model.predict_proba(X_test)[:, 1]
 
@@ -118,13 +125,65 @@ def GBDT(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
     else:
         print("\n\n********************* GBDT Grid Search：  ********************* \n")
         # Set the parameters by cross-validation
-        grid_params = [{'k': range(3, 15)}]
-        model = KNeighborsClassifier()
-        model_select(X_train, X_test, y_train, y_test, model, grid_params)
+        """
+        *** 树参数 ***
+        
+        1. max_ depth 
+        树的最大深度，可以控制过度拟合，因为分类树越深就越可能过度拟合。
+        2. min_ samples_split：
+        树中一个节点所需要用来分裂的最少样本数。可以避免过度拟合。
+        3. min_ samples_leaf 
+        定义了树中终点节点所需要的最少的样本数，也可以用来防止过度拟合。在不均等分类问题中(imbalanced class problems)，一般这个参数需要被设定为较小的值，因为大部分少数类别（minority class）含有的样本都比较小。
+        4. max_ features 
+        决定了用于分类的特征数，根据经验一般选择总特征数的平方根就可以，也可以CV尝试总特征数的30%-40%.
+        
+        *** boost参数 ***
+        
+        1. learning_ rate 
+        决定着每一个树对于最终结果的影响，控制着每次更新的幅度，较小的learning rate使得模型对不同的树更加稳健。
+        2. n_ estimators 
+        需要使用到的决定树的数量，在有较多决定树时能保持稳健，但还是可能发生过度拟合。，需要针对learning rate用CV值检验。
+        3. subsample
+        训练每个决定树所用到的子样本占总样本的比例，而对于子样本的选择是随机的，用稍小于1的值能够使模型更稳健，因为这样减少了方差。
+        """
+
+        step = 6
+        if step == 1:
+            param_test = {'n_estimators': range(95, 115, 1)}
+            model1 = GradientBoostingClassifier(random_state=100)
+            model_select(X_train, X_test, y_train, y_test, model1, param_test)
+        if step == 2:
+            param_test = {'max_depth': range(2, 5, 1), 'min_samples_split': range(16, 25, 1)}
+            model1 = GradientBoostingClassifier(random_state=100, n_estimators=100)
+            model_select(X_train, X_test, y_train, y_test, model1, param_test)
+        if step == 3:
+            param_test = {'min_samples_split': range(2, 10, 2), 'min_samples_leaf': range(10, 20, 2)}
+            model1 = GradientBoostingClassifier(random_state=100, n_estimators=100, max_depth=3)
+            model_select(X_train, X_test, y_train, y_test, model1, param_test)
+        if step == 4:
+            param_test = {'max_features': range(10, 60, 1)}
+            model1 = GradientBoostingClassifier(random_state=100, n_estimators=97, max_depth=3, min_samples_leaf=16,
+                                                min_samples_split=2)
+            model_select(X_train, X_test, y_train, y_test, model1, param_test)
+        if step == 5:
+            param_test = {'subsample': np.arange(0.5, 1.0, 0.05)}
+            model1 = GradientBoostingClassifier(random_state=100, n_estimators=100, max_depth=3, min_samples_leaf=16,
+                                                min_samples_split=2, max_features=38)
+            model_select(X_train, X_test, y_train, y_test, model1, param_test)
+        if step == 6:
+            param_test = [{'learning_rate': [0.05], 'n_estimators': [200]},
+                          {'learning_rate': [0.01], 'n_estimators': [1000]},
+                          {'learning_rate': [0.005], 'n_estimators': [2000]}]
+            model1 = GradientBoostingClassifier(random_state=100, max_depth=3, min_samples_leaf=16, min_samples_split=2,
+                                                max_features=38, subsample=0.85)
+            model_select(X_train, X_test, y_train, y_test, model1, param_test)
 
 
-# XGBoost 分类器模型
-def XGBoost(X_train, X_test, y_train, y_test, silent=False):
+
+            # XGBoost 分类器模型
+
+
+def XGBoost(X_train, X_test, y_train, y_test, grid_search=False, silent=False):
     # 参数设置
     params = {
         'booster': 'gbtree',
@@ -167,7 +226,7 @@ def XGBoost(X_train, X_test, y_train, y_test, silent=False):
 # model_select
 def model_select(X_train, X_test, y_train, y_test, model, grid_param, cv=5):
     # scores = ['precision', 'recall','accuracy','f1','roc_auc']
-    scores = ['precision', 'recall', 'accuracy']
+    scores = ['accuracy']
 
     for score in scores:
         print("# Tuning hyper-parameters for %s" % score)
@@ -200,18 +259,25 @@ def model_select(X_train, X_test, y_train, y_test, model, grid_param, cv=5):
         y_pred = clf.predict(X_test)
         print(classification_report(y_test, y_pred))
         print()
+        y_predprob = clf.predict_proba(X_test)[:, 1]
+        acc_score = accuracy_score(y_test, y_pred)
+        auc_score = roc_auc_score(y_test, y_predprob)
+        print("Accuracy : %.4g" % acc_score)
+        print("AUC Score (Train): %f" % auc_score)
 
-        # # 绘制roc曲线
-        # y_predprob = clf.predict_proba(X_test)[:, 1]
-        # fpr, tpr, thresholds = roc_curve(y_test, y_predprob, pos_label=1.0)
-        # plt.figure()
-        # lw = 2
-        # plt.plot(fpr, tpr, color='darkorange', linewidth=lw, label='ROC curve (area = %0.4f)' % roc_auc_score(y_test,y_pred))
-        # plt.plot([0, 1], [0, 1], color='navy', linewidth=lw, linestyle='--')
-        # plt.xlim([0.0, 1.0])
-        # plt.ylim([0.0, 1.05])
-        # plt.xlabel('False Positive Rate')
-        # plt.ylabel('True Positive Rate')
-        # plt.title('Receiver operating characteristic example')
-        # plt.legend(loc="lower right")
-        # plt.show()
+
+def rocCurve(y_test, y_pred, y_predprob):
+    # 绘制roc曲线
+    fpr, tpr, thresholds = roc_curve(y_test, y_predprob, pos_label=1.0)
+    plt.figure()
+    lw = 2
+    plt.plot(fpr, tpr, color='darkorange', linewidth=lw,
+             label='ROC curve (area = %0.4f)' % roc_auc_score(y_test, y_pred))
+    plt.plot([0, 1], [0, 1], color='navy', linewidth=lw, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic example')
+    plt.legend(loc="lower right")
+    plt.show()

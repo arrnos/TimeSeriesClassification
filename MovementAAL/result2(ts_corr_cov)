@@ -42,6 +42,16 @@ AUC Score (Train): 0.966071
 
 *********************  GBDT 预测：  *********************
 
+model :
+ GradientBoostingClassifier(criterion='friedman_mse', init=None,
+              learning_rate=0.1, loss='deviance', max_depth=3,
+              max_features=None, max_leaf_nodes=None,
+              min_impurity_decrease=0.0, min_impurity_split=None,
+              min_samples_leaf=1, min_samples_split=2,
+              min_weight_fraction_leaf=0.0, n_estimators=100,
+              presort='auto', random_state=100, subsample=1.0, verbose=0,
+              warm_start=False)
+n_estimators :  100
 
               precision    recall  f1-score   support
 
@@ -52,6 +62,8 @@ avg / total       0.98      0.98      0.98        48
 
 Accuracy : 0.9792
 AUC Score (Train): 0.996429
+
+
 *********************  XGBoost 预测：  *********************
 
               precision    recall  f1-score   support
