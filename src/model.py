@@ -36,7 +36,7 @@ def LR(X_train, X_test, y_train, y_test, grid_search=False, init_train=True, sil
 
         model = LogisticRegression()
         if init_train is False:
-            model.set_params(C=61, penalty='l1', solver='liblinear')
+            model.set_params(C=11, penalty='l2', solver='liblinear')
         model.fit(X_train, y_train)
         if silent is False:
             print("model : \n", model)
@@ -45,6 +45,7 @@ def LR(X_train, X_test, y_train, y_test, grid_search=False, init_train=True, sil
         print('\n', classification_report(y_test, y_pred))
         print("Accuracy : %.4g" % accuracy_score(y_test, y_pred))
         print("AUC Score (Train): %f" % roc_auc_score(y_test, y_predprob))
+
     else:
         print("\n\n********************* LR Grid Search：  ********************* \n")
         # Set the parameters by cross-validation
@@ -336,7 +337,7 @@ def model_select(X_train, X_test, y_train, y_test, model, grid_param, cv=5):
     scores = ['roc_auc']
 
     for score in scores:
-        print("# Tuning hyper-parameters for %s" % score)
+        print("\n# Tuning hyper-parameters for %s" % score)
         print()
 
         clf = GridSearchCV(model, grid_param, cv=cv, n_jobs=4, iid=False,
@@ -347,7 +348,7 @@ def model_select(X_train, X_test, y_train, y_test, model, grid_param, cv=5):
 
         print("Best parameters set found on development set:")
         print()
-        print(clf.best_params_)
+        print(clf.best_params_, "\n\n score : %.4f" % clf.best_score_)
         print()
         print("Grid scores on development set:")
         print()

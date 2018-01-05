@@ -1,0 +1,17 @@
+*********************   LR 预测：  *********************
+
+model :
+ LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+          intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+          penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+          verbose=0, warm_start=False)
+
+              precision    recall  f1-score   support
+
+          0       0.75      0.90      0.82        20
+          1       0.92      0.79      0.85        28
+
+avg / total       0.85      0.83      0.83        48
+
+Accuracy : 0.8333
+AUC Score (Train): 0.876786

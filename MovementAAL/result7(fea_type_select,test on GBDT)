@@ -1,0 +1,118 @@
+++++  feature_type : time ++++
+
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.95      1.00      0.98        20
+          1       1.00      0.96      0.98        28
+
+avg / total       0.98      0.98      0.98        48
+
+Accuracy : 0.9792
+AUC Score (Train): 0.996429
+
+++++  feature_type : freq ++++
+
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.75      0.90      0.82        20
+          1       0.92      0.79      0.85        28
+
+avg / total       0.85      0.83      0.83        48
+
+Accuracy : 0.8333
+AUC Score (Train): 0.923214
+
+++++  feature_type : wave ++++
+
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.58      0.75      0.65        20
+          1       0.77      0.61      0.68        28
+
+avg / total       0.69      0.67      0.67        48
+
+Accuracy : 0.6667
+AUC Score (Train): 0.826786
+
+++++  feature_type : time_freq ++++
+
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.91      1.00      0.95        20
+          1       1.00      0.93      0.96        28
+
+avg / total       0.96      0.96      0.96        48
+
+Accuracy : 0.9583
+AUC Score (Train): 0.994643
+
+++++  feature_type : time_wave ++++
+
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.90      0.95      0.93        20
+          1       0.96      0.93      0.95        28
+
+avg / total       0.94      0.94      0.94        48
+
+Accuracy : 0.9375
+AUC Score (Train): 0.985714
+
+++++  feature_type : freq_wave ++++
+
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.76      0.95      0.84        20
+          1       0.96      0.79      0.86        28
+
+avg / total       0.87      0.85      0.86        48
+
+Accuracy : 0.8542
+AUC Score (Train): 0.926786
+
+++++  feature_type : time_freq_wave ++++
+
+
+
+*********************  GBDT 预测：  *********************
+
+
+              precision    recall  f1-score   support
+
+          0       0.87      1.00      0.93        20
+          1       1.00      0.89      0.94        28
+
+avg / total       0.95      0.94      0.94        48
+
+Accuracy : 0.9375
+AUC Score (Train): 0.991071

@@ -16,37 +16,50 @@ X_df_list, y = data_read()
 # X, y = EMD_SVD_feature(X_df_list,y)
 
 # 时间序列统计特征
-X, y = ts_stats_feature(X_df_list, y)
-# X = pd.read_csv("MovementAAL/dataset/feature/ts_stat_feature.csv",sep=',',header=0)
+type_list=["time","freq","wave","time_freq","time_wave","freq_wave","time_freq_wave"]
+for type in type_list:
+    X1, y1 = feature_extraction(X_df_list, y,type=type)
+    print("\n++++  feature_type : {} ++++\n".format(type))
+    # X = pd.read_csv("MovementAAL/dataset/feature/ts_stat_feature.csv",sep=',',header=0)
 
 
-# 三、特征选择
+    # 三、特征选择
+    # for k in range(35,50,1):
+    #     X1,y1 = univariate_feature_selection(X,y,k=k,selent=True)
+    #     print("特征数量：",X1.shape[1])
 
-# X,y = univariate_feature_selection(X,y,percentile=85,selent=True)
-# print("特征数量：",X.shape[1])
+        # k=39时，Accuracy: 0.8958
+        # AUC Score(Train): 0.910714
 
-# 四、数据输出
-y = np.ravel(y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=1000)
+    # 三、特征降维
+    # for n_com in range(10,20,1):
+    #     print("n_components : ",n_com)
+    #     X1,y1=decom_ica(X,y,n_components=n_com)
 
-# 模型字典
-model_dict = {
-    "SVM": SVM,
-    "LR": LR,
-    "KNN": KNN,
-    "GBDT": GBDT,
-    "XGB": XGBoost
-}
+    # 四、数据输出
+    y1 = np.ravel(y1)
 
-# 待测试模型列表
-# model_test = ["LR","SVM", "KNN","GBDT"]
-model_test = ["LR"]
-# grid=True
-grid = False
-silent = False
-init_train = True
+    X_train, X_test, y_train, y_test = train_test_split(X1, y1, test_size=0.15, random_state=1000)
 
-# 训练并测试
-for model in model_test:
-    model_dict.get(model)(X_train, X_test, y_train, y_test, grid_search=grid, init_train=init_train, silent=silent)
+    # 模型字典
+    model_dict = {
+        "SVM": SVM,
+        "LR": LR,
+        "KNN": KNN,
+        "GBDT": GBDT,
+        "XGB": XGBoost
+    }
+
+    # 待测试模型列表
+    # model_test = ["LR","SVM", "KNN","GBDT"]
+    model_test = ["GBDT"]
+    # grid=True
+    grid = False
+    silent = True
+    # init_train = False
+    init_train = True
+
+    # 训练并测试
+    for model in model_test:
+        model_dict.get(model)(X_train, X_test, y_train, y_test, grid_search=grid, init_train=init_train, silent=silent)

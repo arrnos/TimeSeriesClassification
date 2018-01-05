@@ -1,0 +1,118 @@
+++++  feature_type : time ++++
+
+
+
+********************* SVM  预测：  ********************* 
+
+
+              precision    recall  f1-score   support
+
+          0       0.95      0.95      0.95        20
+          1       0.96      0.96      0.96        28
+
+avg / total       0.96      0.96      0.96        48
+
+Accuracy : 0.9583
+AUC Score (Train): 0.989286
+
+++++  feature_type : freq ++++
+
+
+
+********************* SVM  预测：  ********************* 
+
+
+              precision    recall  f1-score   support
+
+          0       0.69      1.00      0.82        20
+          1       1.00      0.68      0.81        28
+
+avg / total       0.87      0.81      0.81        48
+
+Accuracy : 0.8125
+AUC Score (Train): 0.953571
+
+++++  feature_type : wave ++++
+
+
+
+********************* SVM  预测：  ********************* 
+
+
+              precision    recall  f1-score   support
+
+          0       0.85      0.85      0.85        20
+          1       0.89      0.89      0.89        28
+
+avg / total       0.88      0.88      0.88        48
+
+Accuracy : 0.875
+AUC Score (Train): 0.889286
+
+++++  feature_type : time_freq ++++
+
+
+
+********************* SVM  预测：  ********************* 
+
+
+              precision    recall  f1-score   support
+
+          0       0.95      0.95      0.95        20
+          1       0.96      0.96      0.96        28
+
+avg / total       0.96      0.96      0.96        48
+
+Accuracy : 0.9583
+AUC Score (Train): 0.987500
+
+++++  feature_type : time_wave ++++
+
+
+
+********************* SVM  预测：  ********************* 
+
+
+              precision    recall  f1-score   support
+
+          0       0.95      1.00      0.98        20
+          1       1.00      0.96      0.98        28
+
+avg / total       0.98      0.98      0.98        48
+
+Accuracy : 0.9792
+AUC Score (Train): 1.000000
+
+++++  feature_type : freq_wave ++++
+
+
+
+********************* SVM  预测：  ********************* 
+
+
+              precision    recall  f1-score   support
+
+          0       0.86      0.90      0.88        20
+          1       0.93      0.89      0.91        28
+
+avg / total       0.90      0.90      0.90        48
+
+Accuracy : 0.8958
+AUC Score (Train): 0.957143
+
+++++  feature_type : time_freq_wave ++++
+
+
+
+********************* SVM  预测：  ********************* 
+
+
+              precision    recall  f1-score   support
+
+          0       0.95      1.00      0.98        20
+          1       1.00      0.96      0.98        28
+
+avg / total       0.98      0.98      0.98        48
+
+Accuracy : 0.9792
+AUC Score (Train): 1.000000

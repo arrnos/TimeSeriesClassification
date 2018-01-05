@@ -1,0 +1,84 @@
+*********************   LR 预测：  *********************
+
+model :
+ LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,
+          intercept_scaling=1, max_iter=100, multi_class='ovr', n_jobs=1,
+          penalty='l2', random_state=None, solver='liblinear', tol=0.0001,
+          verbose=0, warm_start=False)
+
+              precision    recall  f1-score   support
+
+          0       0.82      0.90      0.86        20
+          1       0.92      0.86      0.89        28
+
+avg / total       0.88      0.88      0.88        48
+
+Accuracy : 0.875
+AUC Score (Train): 0.917857
+
+
+********************* SVM  预测：  *********************
+
+model :
+ SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape='ovr', degree=3, gamma='auto', kernel='rbf',
+  max_iter=-1, probability=True, random_state=None, shrinking=True,
+  tol=0.001, verbose=False)
+
+              precision    recall  f1-score   support
+
+          0       0.95      1.00      0.98        20
+          1       1.00      0.96      0.98        28
+
+avg / total       0.98      0.98      0.98        48
+
+Accuracy : 0.9792
+AUC Score (Train): 1.000000
+
+
+*********************  GBDT 预测：level=3  *********************
+
+model :
+ GradientBoostingClassifier(criterion='friedman_mse', init=None,
+              learning_rate=0.1, loss='deviance', max_depth=3,
+              max_features=None, max_leaf_nodes=None,
+              min_impurity_decrease=0.0, min_impurity_split=None,
+              min_samples_leaf=1, min_samples_split=2,
+              min_weight_fraction_leaf=0.0, n_estimators=100,
+              presort='auto', random_state=100, subsample=1.0, verbose=0,
+              warm_start=False)
+n_estimators :  100
+
+              precision    recall  f1-score   support
+
+          0       0.95      1.00      0.98        20
+          1       1.00      0.96      0.98        28
+
+avg / total       0.98      0.98      0.98        48
+
+Accuracy : 0.9792
+AUC Score (Train): 0.991071
+
+
+*********************  GBDT 预测：level=4 *********************
+
+model :
+ GradientBoostingClassifier(criterion='friedman_mse', init=None,
+              learning_rate=0.1, loss='deviance', max_depth=3,
+              max_features=None, max_leaf_nodes=None,
+              min_impurity_decrease=0.0, min_impurity_split=None,
+              min_samples_leaf=1, min_samples_split=2,
+              min_weight_fraction_leaf=0.0, n_estimators=100,
+              presort='auto', random_state=100, subsample=1.0, verbose=0,
+              warm_start=False)
+n_estimators :  100
+
+              precision    recall  f1-score   support
+
+          0       0.95      0.95      0.95        20
+          1       0.96      0.96      0.96        28
+
+avg / total       0.96      0.96      0.96        48
+
+Accuracy : 0.9583
+AUC Score (Train): 0.983929
