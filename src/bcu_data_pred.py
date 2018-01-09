@@ -12,80 +12,26 @@ import pywt
 from sklearn.decomposition import PCA, IncrementalPCA, FactorAnalysis, RandomizedPCA, FastICA
 
 os.chdir("/Users/arrnos/PycharmProjects/TimeSeriesClassification/")
-feature_path = "MovementAAL/dataset"
+bcu_data_path = "MovementAAL/bcu_data/"
 
 
 # 读取数据
 def data_read():
-    # load label data
-    y_df = pd.read_csv("MovementAAL/dataset/MovementAAL_target.csv")
-    y = y_df.iloc[:, -1].replace({-1: 0})
+    y = []
+    # load bcu data
+    label_list = filter(lambda x: x.startswith("label_"), os.listdir(bcu_data_path))
+    label_list = sorted(label_list, key=lambda x: int(re.findall('\d+', x)[0]))
+    label_df_list = []
+    for label in label_list:
+        files = filter(lambda x: x.startswith("Bcu_Exception_Label_"), os.listdir(bcu_data_path + label))
+        files = sorted(files, key=lambda x: int(re.findall('\d+', x)[1]))
 
-    # load feature data
-    X_file_list = filter(lambda x: x.startswith("MovementAAL_RSS_"), os.listdir(feature_path))
-    X_file_list = sorted(X_file_list, key=lambda x: int(re.findall('\d+', x)[0]))
-    X_df_list = []
-    for file in X_file_list:
-        X_df = pd.read_csv(feature_path + '/' + file, delimiter=',')
-        X_df_list.append(X_df)
-    return X_df_list, y
+        for file in files:
+            label_file_df = pd.read_csv(bcu_data_path + label + '/' + file, delimiter=',')
+            label_df_list.append(label_file_df)
+            y.append(int(re.findall('\d+', label)[0]))
 
-
-# SVD feature 构造
-def SVD_feature(X_df_list, y):
-    SVD_feature_list = []
-    for X_matrix in X_df_list:
-        U, sigma, VT = la.svd(X_matrix)
-        feature = VT.reshape(1, -1)[0][:4]
-        SVD_feature_list.append(feature)
-    # np.savetxt('MovementAAL/dataset/feature/EMD_SVD_feature.csv',SVD_feature_list,fmt='%s',delimiter=',')
-    X_SVD_feature = pd.DataFrame(SVD_feature_list)
-    # return pd.concat([feature_df, target.ix[:, [-1]]], axis=1)
-    return X_SVD_feature, y
-
-
-# EMD feature 构造
-def EMD_feature(X_df_list, y):
-    columns = X_df_list[0].columns
-    EMD_df_list = []
-    for i, X_matrix in enumerate(X_df_list):
-        # 一、EMD 特征提取 训练过程
-        # t = np.arange(len(X_matrix))
-        # new_EMD_df = pd.DataFrame(index=range(len(X_matrix)),columns=columns)
-        # for col_i in columns:
-        #     s = X_matrix[col_i].values
-        #     IMF = EEMD().eemd(s, t)
-        #     if len(IMF)>1:
-        #         imf2 = pd.DataFrame(IMF[1])
-        #     else:
-        #         imf2 = pd.DataFrame(IMF[0])
-        #     new_EMD_df[col_i]=imf2
-
-        # print(type(imf2),type(IMF),IMF.shape)
-        # 画图
-        # plt.subplot(2, 1, 1)
-        # plt.plot(s, 'r')
-        # plt.title("Input signal: data0_%s" % col_i)
-        # plt.subplot(N, 1, 2)
-        # plt.plot(imf2, 'g')
-        # plt.title("Input signal: imf_2")
-        # plt.tight_layo uuuut()
-        # plt.show()
-        # new_EMD_df.to_csv('MovementAAL/dataset_EMD/MovementAAL_EMD_{}.csv'.format(i),index=None)
-        # EMD_df_list.append(new_EMD_df)
-        # print("正在处理第{}个文件".format(i))
-
-        # 二、从文件读取
-        new_EMD_df = pd.read_csv('MovementAAL/dataset_EMD/MovementAAL_EMD_{}.csv'.format(i))
-        EMD_df_list.append(new_EMD_df)
-    return EMD_df_list, y
-
-
-# EMD_SVD feature 构造
-def EMD_SVD_feature(X_list, y):
-    EMD_df_list, y = EMD_feature(X_list, y)
-    X_SVD_feature, y = SVD_feature(EMD_df_list, y)
-    return X_SVD_feature, y
+    return label_df_list, y
 
 
 # 时间序列统计 feature构造
@@ -96,15 +42,16 @@ def feature_extraction(X_df_list, type='time_freq_wave'):
     :param type: 特征类型，Optional["time","freq","wave","time_freq","time_wave","freq_wave","time_freq_wave"]
     :return: feature_df, y
     """
-    if type not in ["time","freq","wave","time_freq","time_wave","freq_wave","time_freq_wave"]:
+    if type not in ["time", "freq", "wave", "time_freq", "time_wave", "freq_wave", "time_freq_wave"]:
         print('type error,type should be one of [time,freq,wave,time_freq,time_wave,freq_wave,time_freq_wave]')
         return
-    #  时域特征提取
+    # 时域特征提取
     time_feature_df = time_domain_feature(X_df_list)
     # time_feature_df.to_csv('MovementAAL/dataset/feature/time_feature.csv',index=None)
 
     #  频域特征提取
-    freq_feature_df = freq_domain_feature(X_df_list)
+    # freq_feature_df = freq_domain_feature(X_df_list)
+    freq_feature_df = None
     # freq_feature_df.to_csv('MovementAAL/dataset/feature/freq_feature.csv',index=None)
 
     #  小波能量特征提取
@@ -118,13 +65,13 @@ def feature_extraction(X_df_list, type='time_freq_wave'):
     elif type == "wave":
         feature_df = wave_feature_df
     elif type == "time_freq":
-        feature_df = pd.concat([time_feature_df,freq_feature_df],axis=1)
+        feature_df = pd.concat([time_feature_df, freq_feature_df], axis=1)
     elif type == "time_wave":
-        feature_df = pd.concat([time_feature_df,wave_feature_df],axis=1)
+        feature_df = pd.concat([time_feature_df, wave_feature_df], axis=1)
     elif type == "freq_wave":
-        feature_df = pd.concat([freq_feature_df,wave_feature_df],axis=1)
+        feature_df = pd.concat([freq_feature_df, wave_feature_df], axis=1)
     else:
-        feature_df = pd.concat([time_feature_df,freq_feature_df,wave_feature_df],axis=1)
+        feature_df = pd.concat([time_feature_df, freq_feature_df, wave_feature_df], axis=1)
 
     # feature_df.to_csv('MovementAAL/dataset/feature/time_fre_wave_feature.csv',index=None)
     return feature_df
@@ -135,32 +82,39 @@ def time_domain_feature(X_df_list):
     ts_df_columns = ['Count', 'Mean', 'Min',
                      'Q1', 'Median', 'Q3',
                      'Max', 'PPv', 'Mad', 'Var',  # 峰峰值 平均绝对离差 方差
-                     'Std', 'Skew', 'Kurt', 'Crest_Factor']  # 均方根，峰度，偏度,波峰因子
+                     'Std', 'Skew', 'Kurt']  # 均方根，峰度，偏度
     # 时间序列特征faltten
     x_df_columns = X_df_list[0].columns
+
+    # 挑选bcu 属性列，从po1:2开始
+    x_df_columns = x_df_columns[2:]
+
     ts_index = []
     for df_col in x_df_columns:
         ts_index.append([x + '_' + df_col for x in ts_df_columns])
     ts_columns = list(np.array(ts_index).reshape(1, -1)[0])
 
+    # 2. 相关系数columns
     n = len(x_df_columns)
-    corr_columns = ["corr_" + str(x) for x in range(n * (n - 1) // 2)]  # len(corr_fea)=len(columns)*(len(columns)-1)/2
-    cov_columns = ["cov_" + str(x) for x in range(n * (n + 1) // 2)]  # len(cov_fea)
+    corr_columns = ["corr_" + str(x) for x in range(n*(n-1)//2)]  # len(corr_fea)=len(columns)*(len(columns)-1)/2
+    cov_columns = ["cov_" + str(x) for x in range(n*(n+1)//2)]  # len(cov_fea)
 
-    columns = ts_columns + corr_columns + cov_columns
+    # columns = ts_columns + corr_columns + cov_columns
+    columns = ts_columns + cov_columns
 
     # 3. 特征list
     feature_list = []
 
     for x in X_df_list:
+        # 挑选bcu 属性列，从po1:2开始
+        x=x.iloc[:,2:]
         # 时间序列特征构造
         ts_fea_list = [x.count(), x.mean(), x.min(),
                        x.quantile(.25), x.median(),
                        x.quantile(.75), x.max(),
                        x.max() - x.min(), x.mad(),
                        x.var(), x.std(),
-                       x.skew(), x.kurt(),
-                       x.max() / x.pow(2).mean()
+                       x.skew(), x.kurt()
                        ]
 
         ts_df = pd.DataFrame(ts_fea_list, index=ts_df_columns)
@@ -183,7 +137,8 @@ def time_domain_feature(X_df_list):
                 if i <= j:
                     cov_fea.append(col)
 
-        fea_line = ts_fea + corr_fea + cov_fea
+        # fea_line = ts_fea + corr_fea + cov_fea
+        fea_line = ts_fea  + cov_fea
         feature_list.append(fea_line)
 
     ts_feature_df = pd.DataFrame(feature_list, columns=columns)
@@ -193,6 +148,8 @@ def time_domain_feature(X_df_list):
 # 小波变换 feature构造
 def wave_domain_feature(X_df_list):
     columns = X_df_list[0].columns
+    # bcu columns
+    columns = columns[2:]
     wave_fea_list = []
     level = 0
     for x in X_df_list:
@@ -227,6 +184,7 @@ def col_wavedec(col):
 # 频域特征提取
 def freq_domain_feature(X_df_list):
     columns = X_df_list[0].columns
+    columns = columns[2:]
     freq_fea_list = []
     for x in X_df_list:
         x_col_fea_list = []
@@ -281,11 +239,6 @@ def decom_pca(feature_df, y, n_components=17):
 
 if __name__ == '__main__':
     X_df_list, y = data_read()
-    # X_SVD_feature, y = EMD_SVD_feature(X_df_list,y)
-    # print(X_SVD_feature)
-    # WAV_feature(X_df_list,y)
-    # feature_df, y = ts_stats_feature(X_df_list, y)
-    # decom_pca(feature_df, y)
-    # freq_domain_feature()
-    x,y = feature_extraction(X_df_list, y)
-    print(x)
+    print(X_df_list)
+    fea_df,y = feature_extraction(X_df_list, y, type='time_freq_wave')
+    # print(fea_df)

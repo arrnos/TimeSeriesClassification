@@ -18,7 +18,7 @@ X_df_list, y = data_read()
 # 时间序列统计特征
 type_list=["time","freq","wave","time_freq","time_wave","freq_wave","time_freq_wave"]
 for type in type_list:
-    X1, y1 = feature_extraction(X_df_list, y,type=type)
+    X1= feature_extraction(X_df_list,type=type)
     print("\n++++  feature_type : {} ++++\n".format(type))
     # X = pd.read_csv("MovementAAL/dataset/feature/ts_stat_feature.csv",sep=',',header=0)
 
@@ -38,9 +38,9 @@ for type in type_list:
     #     X1,y1=decom_ica(X,y,n_components=n_com)
 
     # 四、数据输出
-    y1 = np.ravel(y1)
+    y = np.ravel(y)
 
-    X_train, X_test, y_train, y_test = train_test_split(X1, y1, test_size=0.15, random_state=1000)
+    X_train, X_test, y_train, y_test = train_test_split(X1, y, test_size=0.15, random_state=1000)
 
     # 模型字典
     model_dict = {
