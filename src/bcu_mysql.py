@@ -1,9 +1,10 @@
 import pymysql
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
-
-def mysql_query(t_id):
+# 查询某车次的整条BCU数据
+def query_lineData_by_tID(t_id):
     # 打开数据库连接
     db = pymysql.connect("localhost", "root", "root123", "shuohuang", charset='utf8')
 
@@ -25,17 +26,57 @@ def mysql_query(t_id):
     db.close()
     return df
 
-#滑动窗口获取长时间序列的一系列片段，用于导入分类模型进行预测
-def df_slide_window_part(data_df,window_len = 80,step=10):
-    line_part_list=[]
-    start=0
-    while(start+80<len(data_df)):
-        new_part = data_df.iloc[start:start+80,:]
-        start+=step
-        line_part_list.append(new_part)
-    return line_part_list
 
+# 整车次分割成BCU时间片段
+def df_slide_window_part(data_df, window_len=80, step=10):
+    line_part_list = []
+    part_time_list = []
+    start = 0
+    while (start + window_len < len(data_df)):
+        new_part = data_df.iloc[start:start + window_len, :]  # 去窗口中间位置的time属性作为该part的时间戳，用于从LKJ表中获取公里标和经纬度
+        line_part_list.append(new_part)
+        part_time_list.append(data_df.iloc[start + window_len // 2, 0])
+        start += step
+    return line_part_list, part_time_list
+
+
+# 根据t_id，time 查询LKJ表中的 公里标:kilometer
+def query_kilo_by_time(time, t_id):
+    db = pymysql.connect("localhost", "root", "root123", "shuohuang", charset='utf8')
+
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+
+    # 使用 execute()  方法执行 SQL 查询
+    sql = "select time,kilometer from bcu_mysql_table where tId={} and time >={} limit 1".format(t_id,"\'" + str(time) + "\'")
+    cursor.execute(sql)
+
+    # 使用 fetchone() 方法获取单条数据.
+    # data=(time,kilometer)
+    data = cursor.fetchone()  # 结果返回元组格式，需要转化为list,便于传入DataFrame
+    # 关闭数据库连接
+    db.close()
+    return data
+
+# 根据kilometer 查询对应的经纬度
+def query_jwd_by_kilometer(kilometer):
+    db = pymysql.connect("localhost", "root", "root123", "shuohuang", charset='utf8')
+
+    # 使用 cursor() 方法创建一个游标对象 cursor
+    cursor = db.cursor()
+
+    # 使用 execute()  方法执行 SQL 查询
+    sql = "select l1,l2 from jwd where kilometer = {}".format(kilometer)
+    cursor.execute(sql)
+
+    # 使用 fetchone() 方法获取单条数据.
+    # data=(time,kilometer)
+    data = cursor.fetchone()  # 结果返回元组格式，需要转化为list,便于传入DataFrame
+    # 关闭数据库连接
+    db.close()
+    return data
 
 if __name__ == '__main__':
-    df = mysql_query(1)
-    df_slide_window_part(df)
+    # df = query_lineData_by_tID(3)
+    # df_slide_window_part(df)
+    query_jwd_by_kilometer(4.600)

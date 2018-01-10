@@ -8,13 +8,12 @@ np.set_printoptions(threshold=np.inf)
 pd.set_option('display.max_rows',None)
 
 
-def bcu_model_detect(model="LR",):
+def bcu_model_detect(model="LR", t_id = 3,window_len=200, step=100):
 
     # 加载数据
     # 从数据库查询某车次的数据，返回DataFrame,并通过滑动窗口继续分裂
-    test_tid = 1
-    test_line_df = bcu_mysql.mysql_query(test_tid)
-    line_part_list = bcu_mysql.df_slide_window_part(test_line_df, window_len=80, step=10)
+    test_line_df = bcu_mysql.query_lineData_by_tID(t_id)
+    line_part_list,part_time_list = bcu_mysql.df_slide_window_part(test_line_df, window_len=window_len, step=step)
     X_test = line_part_list
     # 特征工程
     X_test= bcu_data_pred.feature_extraction(X_test)
@@ -22,10 +21,24 @@ def bcu_model_detect(model="LR",):
     model= joblib.load("MovementAAL/bcu_data/model/{}_model.model".format(model))
     y_pred = model.predict(X_test)
     y_predprob = model.predict_proba(X_test)[:, 1]
-    y_rs = np.where(y_predprob>0.75,y_pred,-1)
-    print(y_rs)
+    y_rs = list(np.where(y_predprob>0.6,y_pred,-1)) # 设置预测概率，过滤不合理的分类
+
+    # （time,ylabel）结合
+    time_ylabel_df = pd.DataFrame(np.array([part_time_list,y_rs]).T,columns=['time','ylabel'])
+    # 过滤正常类
+    filter_index = time_ylabel_df['ylabel']!=-1
+    time_ylabel_filter = time_ylabel_df[filter_index] # 异常时间点和故障类别
+    kilometer = time_ylabel_filter.iloc[:,0].apply(lambda x :(bcu_mysql.query_kilo_by_time(x,t_id))[1])
+    jwd=kilometer.apply(lambda x:bcu_mysql.query_jwd_by_kilometer(x))
+    l1=jwd.map(lambda x:x[0])
+    l2 = jwd.map(lambda x:x[1])
+    time_ylabel_filter.insert(2,'kilometer',kilometer)
+    time_ylabel_filter.insert(3,'l1',l1)
+    time_ylabel_filter.insert(4,'l2',l2)
+    print(time_ylabel_filter)
+    return time_ylabel_filter
 
 if __name__ == '__main__':
     # for model in ['LR',"GBDT"]:
     for model in ['LR']:
-        bcu_model_detect(model=model)
+        bcu_model_detect(model=model,t_id=1,window_len=200, step=100)
