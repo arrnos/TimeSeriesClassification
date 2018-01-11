@@ -27,7 +27,7 @@ def data_read():
         files = sorted(files, key=lambda x: int(re.findall('\d+', x)[1]))
 
         for file in files:
-            label_file_df = pd.read_csv(bcu_data_path + label + '/' + file, delimiter=',')
+            label_file_df = pd.read_excel(bcu_data_path + label + '/' + file, delimiter=',')
             label_df_list.append(label_file_df)
             y.append(int(re.findall('\d+', label)[0]))
 

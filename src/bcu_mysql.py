@@ -48,7 +48,7 @@ def query_kilo_by_time(time, t_id):
     cursor = db.cursor()
 
     # 使用 execute()  方法执行 SQL 查询
-    sql = "select time,kilometer from bcu_mysql_table where tId={} and time >={} limit 1".format(t_id,"\'" + str(time) + "\'")
+    sql = "select time,kilometer from LKJ where tId={} and time >={} limit 1".format(t_id,"\'" + str(time) + "\'")
     cursor.execute(sql)
 
     # 使用 fetchone() 方法获取单条数据.

@@ -186,7 +186,7 @@ def bcu_part_gen(num_sample=None, label=0):
         # print([len(x) for x in col_list])
         # print(columns)
         # print(df)
-        df.to_csv("MovementAAL/bcu_data/label_{}/Bcu_Exception_Label_{}_sample_{}.csv".format(label, label, i),
+        df.to_excel("MovementAAL/bcu_data/label_{}/Bcu_Exception_Label_{}_sample_{}.xlsx".format(label, label, i),
                   index=None)
 
 
